@@ -2,7 +2,9 @@ package com.game.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.Random;
@@ -14,6 +16,7 @@ public class Game extends ApplicationAdapter {
 	private float gravidade = 0;
 	private float posicaoInicialVerticalPassaro = 0;
 	private float posicaoCanoHorizontal;
+	private float posicaoCanoVerticalTopo;
 	private float posicaoCanoVertical;
 	private float espacoEntreCanos;
 	private Random random;
@@ -22,6 +25,9 @@ public class Game extends ApplicationAdapter {
 	private Texture fundo;
 	private Texture canoBaixo;
 	private Texture canoTopo;
+	private BitmapFont textoPontuacao;
+	private int pontos = 0;
+	private boolean passouCano;
 	@Override
 	public void create () {
 		//Gdx.app.log("create","jogo iniciado");
@@ -33,6 +39,7 @@ public class Game extends ApplicationAdapter {
 	public void render () {
 
 		verificarEstados();
+		validarPontos();
 		desenharTexturas();
 	}
 
@@ -41,7 +48,9 @@ public class Game extends ApplicationAdapter {
 		posicaoCanoHorizontal -= Gdx.graphics.getDeltaTime() * 200;
 		if(posicaoCanoHorizontal < - canoBaixo.getWidth()){
 			posicaoCanoHorizontal = larguraDispositivo;
-			posicaoCanoVertical = random.nextInt(800)-400;
+			posicaoCanoVerticalTopo= random.nextInt(800)-400;
+			posicaoCanoVertical = random.nextInt(800)-100;
+			passouCano = false;
 		}
 		boolean toqueTela = Gdx.input.justTouched();
 		if(toqueTela){
@@ -62,10 +71,21 @@ public class Game extends ApplicationAdapter {
 	private void desenharTexturas(){
 		batch.begin();
 		batch.draw(fundo, 0,0,larguraDispositivo,alturaDispositivo);
-		batch.draw(passaros[(int) variacao],30,posicaoInicialVerticalPassaro);
-		batch.draw(canoBaixo,posicaoCanoHorizontal,(alturaDispositivo/2)-canoBaixo.getHeight() - (espacoEntreCanos + posicaoCanoVertical));
+		batch.draw(passaros[(int) variacao],50,posicaoInicialVerticalPassaro);
+		batch.draw(canoBaixo,posicaoCanoHorizontal,(alturaDispositivo/2)-canoBaixo.getHeight() - (espacoEntreCanos + posicaoCanoVerticalTopo));
 		batch.draw(canoTopo,posicaoCanoHorizontal,(alturaDispositivo/2)+(espacoEntreCanos + posicaoCanoVertical));
+		textoPontuacao.draw(batch, String.valueOf(pontos),larguraDispositivo/2, alturaDispositivo-100);
 		batch.end();
+	}
+
+	public void validarPontos(){
+		if(posicaoCanoHorizontal < 50 - passaros[0].getWidth()){
+			if(!passouCano){
+				pontos ++;
+				passouCano = true;
+			}
+
+		}
 	}
 	private void initTexturas(){
 		fundo = new Texture("fundo.png");
@@ -84,6 +104,10 @@ public class Game extends ApplicationAdapter {
 		posicaoInicialVerticalPassaro = alturaDispositivo /2;
 		posicaoCanoHorizontal = larguraDispositivo;
 		espacoEntreCanos = 250;
+
+		textoPontuacao = new BitmapFont();
+		textoPontuacao.setColor(Color.WHITE);
+		textoPontuacao.getData().setScale(10);
 	}
 	@Override
 	public void dispose () {

@@ -6,6 +6,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Rectangle;
 
 import java.util.Random;
 
@@ -28,6 +32,10 @@ public class Game extends ApplicationAdapter {
 	private BitmapFont textoPontuacao;
 	private int pontos = 0;
 	private boolean passouCano;
+	private ShapeRenderer shapeRenderer;
+	private Circle circuloPassaro;
+	private Rectangle retanguloCanoTopo;
+	private Rectangle retanguloCanoBaixo;
 	@Override
 	public void create () {
 		//Gdx.app.log("create","jogo iniciado");
@@ -41,6 +49,16 @@ public class Game extends ApplicationAdapter {
 		verificarEstados();
 		validarPontos();
 		desenharTexturas();
+		detectarColisoes();
+	}
+
+	private void detectarColisoes() {
+		circuloPassaro.set(50+passaros[0].getWidth()/2, posicaoInicialVerticalPassaro + passaros[0].getHeight()/2, passaros[0].getWidth()/2);
+		retanguloCanoTopo.set(posicaoCanoHorizontal,(alturaDispositivo/2)+(espacoEntreCanos + posicaoCanoVertical), canoTopo.getWidth(),canoTopo.getHeight());
+		retanguloCanoBaixo.set(posicaoCanoHorizontal,(alturaDispositivo/2)-canoBaixo.getHeight() - (espacoEntreCanos + posicaoCanoVerticalTopo),canoBaixo.getWidth(),canoBaixo.getHeight());
+        if(Intersector.overlaps(circuloPassaro,retanguloCanoTopo) || Intersector.overlaps(circuloPassaro,retanguloCanoBaixo)){
+
+		}
 	}
 
 	private void verificarEstados(){
@@ -108,6 +126,11 @@ public class Game extends ApplicationAdapter {
 		textoPontuacao = new BitmapFont();
 		textoPontuacao.setColor(Color.WHITE);
 		textoPontuacao.getData().setScale(10);
+
+		shapeRenderer = new ShapeRenderer();
+		circuloPassaro = new Circle();
+		retanguloCanoTopo = new Rectangle();
+		retanguloCanoBaixo = new Rectangle();
 	}
 	@Override
 	public void dispose () {

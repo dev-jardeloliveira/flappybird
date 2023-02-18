@@ -29,13 +29,17 @@ public class Game extends ApplicationAdapter {
 	private Texture fundo;
 	private Texture canoBaixo;
 	private Texture canoTopo;
+	private Texture gameOver;
 	private BitmapFont textoPontuacao;
+	private BitmapFont textoReiniciar;
+	private BitmapFont textoMelhorPontuacao;
 	private int pontos = 0;
 	private boolean passouCano;
 	private ShapeRenderer shapeRenderer;
 	private Circle circuloPassaro;
 	private Rectangle retanguloCanoTopo;
 	private Rectangle retanguloCanoBaixo;
+    private int estadoJogo = 0;
 	@Override
 	public void create () {
 		//Gdx.app.log("create","jogo iniciado");
@@ -57,33 +61,44 @@ public class Game extends ApplicationAdapter {
 		retanguloCanoTopo.set(posicaoCanoHorizontal,(alturaDispositivo/2)+(espacoEntreCanos + posicaoCanoVertical), canoTopo.getWidth(),canoTopo.getHeight());
 		retanguloCanoBaixo.set(posicaoCanoHorizontal,(alturaDispositivo/2)-canoBaixo.getHeight() - (espacoEntreCanos + posicaoCanoVerticalTopo),canoBaixo.getWidth(),canoBaixo.getHeight());
         if(Intersector.overlaps(circuloPassaro,retanguloCanoTopo) || Intersector.overlaps(circuloPassaro,retanguloCanoBaixo)){
-
+           estadoJogo = 2;
 		}
 	}
 
 	private void verificarEstados(){
+        boolean toqueTela = Gdx.input.justTouched();
+        if(estadoJogo == 0){
 
-		posicaoCanoHorizontal -= Gdx.graphics.getDeltaTime() * 200;
-		if(posicaoCanoHorizontal < - canoBaixo.getWidth()){
-			posicaoCanoHorizontal = larguraDispositivo;
-			posicaoCanoVerticalTopo= random.nextInt(800)-400;
-			posicaoCanoVertical = random.nextInt(800)-100;
-			passouCano = false;
-		}
-		boolean toqueTela = Gdx.input.justTouched();
-		if(toqueTela){
-			gravidade = -15;
-		}
-
-		if(posicaoInicialVerticalPassaro > 0 || toqueTela)
-			posicaoInicialVerticalPassaro = posicaoInicialVerticalPassaro - gravidade;
+            if(toqueTela){
+                gravidade = -15;
+                estadoJogo = 1;
+            }
 
 
-		gravidade++;
-		variacao+= Gdx.graphics.getDeltaTime() * 10;
+        } else if (estadoJogo == 1) {
+			if(toqueTela){
+				gravidade = -15;
+			}
+            posicaoCanoHorizontal -= Gdx.graphics.getDeltaTime() * 200;
+            if(posicaoCanoHorizontal < - canoBaixo.getWidth()){
+                posicaoCanoHorizontal = larguraDispositivo;
+                posicaoCanoVerticalTopo= random.nextInt(800)-400;
+                posicaoCanoVertical = random.nextInt(800)-100;
+                passouCano = false;
+            }
+            if(posicaoInicialVerticalPassaro > 0 || toqueTela)
+                posicaoInicialVerticalPassaro = posicaoInicialVerticalPassaro - gravidade;
 
-		if(variacao > 3)
-			variacao=0;
+
+            gravidade++;
+
+
+        } else if (estadoJogo == 2) {
+
+        }
+
+
+
 
 	}
 	private void desenharTexturas(){
@@ -93,6 +108,11 @@ public class Game extends ApplicationAdapter {
 		batch.draw(canoBaixo,posicaoCanoHorizontal,(alturaDispositivo/2)-canoBaixo.getHeight() - (espacoEntreCanos + posicaoCanoVerticalTopo));
 		batch.draw(canoTopo,posicaoCanoHorizontal,(alturaDispositivo/2)+(espacoEntreCanos + posicaoCanoVertical));
 		textoPontuacao.draw(batch, String.valueOf(pontos),larguraDispositivo/2, alturaDispositivo-100);
+		if(estadoJogo == 2){
+			batch.draw(gameOver, (larguraDispositivo/2) - (gameOver.getWidth()/2) , alturaDispositivo /2);
+			textoReiniciar.draw(batch,"Toque para reiniciar!", larguraDispositivo/2 -140, alturaDispositivo/2 - (gameOver.getHeight()/2));
+			textoMelhorPontuacao.draw(batch,"Seu record é: 0 pontos",larguraDispositivo/2 -140,alturaDispositivo/2 -gameOver.getHeight());
+		}
 		batch.end();
 	}
 
@@ -104,11 +124,16 @@ public class Game extends ApplicationAdapter {
 			}
 
 		}
+        variacao+= Gdx.graphics.getDeltaTime() * 10;
+
+        if(variacao > 3)
+            variacao=0;
 	}
 	private void initTexturas(){
 		fundo = new Texture("fundo.png");
 		canoBaixo = new Texture("cano_baixo_maior.png");
 		canoTopo = new Texture("cano_topo_maior.png");
+		gameOver = new Texture("game_over.png");
 		passaros=new Texture[3];
 		passaros[0] = new Texture("passaro1.png");
 		passaros[1] = new Texture("passaro2.png");
@@ -126,6 +151,14 @@ public class Game extends ApplicationAdapter {
 		textoPontuacao = new BitmapFont();
 		textoPontuacao.setColor(Color.WHITE);
 		textoPontuacao.getData().setScale(10);
+
+		textoReiniciar = new BitmapFont();
+		textoReiniciar.setColor(Color.GREEN);
+		textoReiniciar.getData().setScale(4);
+
+		textoMelhorPontuacao = new BitmapFont();
+		textoMelhorPontuacao.setColor(Color.RED);
+		textoMelhorPontuacao.getData().setScale(4);
 
 		shapeRenderer = new ShapeRenderer();
 		circuloPassaro = new Circle();
